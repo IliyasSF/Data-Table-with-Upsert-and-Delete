@@ -1,0 +1,86 @@
+<template>    
+    <template if:false={showData}>
+        <lightning-spinner alternative-text="Loading"></lightning-spinner>
+    </template>
+    <template if:true={showData}>
+        <lightning-card class="slds-card_boundary" icon-name="custom:custom13">
+            <h1 slot="title">Dynamic {objectLabel} records upsertion and deletion</h1>
+            <template if:true={viewMode}>
+                <lightning-button style="padding-right: 15px;" value="editMode" slot="actions" variant="brand" label="Edit Mode" onclick={handleModes}></lightning-button>
+                <lightning-button style="padding-right: 15px;" value="insertMode" slot="actions" variant="brand" label="Insert Mode" onclick={handleModes}></lightning-button>
+                <lightning-button slot="actions" variant="brand" value="deleteMode" label="Delete Mode" onclick={handleModes}></lightning-button>
+            </template>
+            <template if:true={editMode}>
+                <lightning-button style="padding-right: 15px;" slot="actions" variant="brand" label="Cancel" onclick={handleEditCancel}></lightning-button>                
+                <lightning-button slot="actions" variant="brand" label="Save" onclick={handleSave}></lightning-button>
+            </template> 
+            <template if:true={insertMode}>
+                <lightning-button style="padding-right: 15px;" slot="actions" variant="brand" label="Cancel" onclick={handleInsertAndDeleteCancel}></lightning-button>                
+                <lightning-button style="padding-right: 15px;" slot="actions" variant="brand" label="Add Row" onclick={addRow}></lightning-button>
+                <lightning-button slot="actions" variant="brand" label="Save" onclick={handleSave}></lightning-button>
+            </template>             
+            <template if:true={deleteMode}>
+                <lightning-button style="padding-right: 15px;" slot="actions" variant="brand" label="Cancel" onclick={handleInsertAndDeleteCancel}></lightning-button>
+                <lightning-button slot="actions" variant="brand" label="Delete" onclick={handleDelete}></lightning-button>
+            </template>                    
+            <div class="slds-card__body slds-card__body_inner">               
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-var-m-bottom_large"> 
+                    <thead>
+                        <tr class="slds-text-title_caps">  
+                            <template if:true={deleteMode}>
+                                <th ><div class="slds-truncate"></div></th>
+                            </template>
+
+                            <template for:each={columns} for:item="column">
+                                <th key={column.fieldName}><div class="slds-truncate">{column.label}</div></th>
+                            </template>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={visibleRecords} for:item="row" for:index="index">
+                            <tr class="inputRows" key={row.uuid}>  
+                                <template if:true={deleteMode}>
+                                    <td>
+                                        <lightning-input type="checkbox" data-id={row.uuid} data-name="checkbox" aura-id="checkbox" onchange={getSelectedRecords} name="input1" checked={row.isChecked}></lightning-input>
+                                    </td>                                    
+                                </template> 
+                                <template for:each={columns} for:item="column">
+                                    <td key={column.fieldName}>                                         
+                                        <c-input-component record={row} field={column.fieldName} field-type={column.fieldType} field-info={column.fieldInfo} options={column.pickListValues} upsert-mode={upsertMode} is-picklist={column.isPicklist} onupdate={updateVal} ></c-input-component>                                                                                                                                                                                                                                                                                                                                                                                                           
+                                    </td>
+                                </template>
+                                <template if:true={insertMode}>
+                                    <td>
+                                        <lightning-button-icon icon-name="utility:delete" value={index} variant="bare" onclick={removeRow}></lightning-button-icon>
+                                    </td>
+                                </template>                                                                                                                                                                                                                
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>  
+                <template if:false={insertMode}>                                    
+                    <div slot="footer" class="slds-var-m-vertical_medium">
+                        <lightning-layout>
+                            <lightning-layout-item>
+                                <lightning-button label="Previous" 
+                                icon-name="utility:chevronleft"
+                                onclick={previousHandler}
+                                disabled={disablePrevious}></lightning-button>
+                            </lightning-layout-item>
+                            <lightning-layout-item flexibility="grow">
+                                <p class="slds-text-align_center">Displaying {currentPage} of {totalPage} {page}</p>
+                            </lightning-layout-item>
+                            <lightning-layout-item>
+                                <lightning-button label="next" 
+                                icon-name="utility:chevronright"
+                                icon-position="right"
+                                onclick={nextHandler}
+                                disabled={disableNext}></lightning-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>                      
+                </template>                                         
+            </div>
+        </lightning-card>
+    </template>  
+</template>
