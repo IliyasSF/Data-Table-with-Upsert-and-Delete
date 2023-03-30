@@ -1,0 +1,66 @@
+/*************************************************************************************
+* @Name         : DatatableWithUpsertDeleteControllerTest.cls
+* @Description  : Test class for DatatableWithUpsertDeleteController.cls
+* @Created By   : Mohammed Iliyas
+* @Modification Log:
+**************************************************************************************
+* Version     Developer      Date        Description
+*-------------------------------------------------------------------------------------
+*
+*************************************************************************************/
+@isTest 
+public class DatatableWithUpsertDeleteControllerTest 
+{
+    @testSetup
+    static void dataSetup() 
+    {
+        //Creating Account        
+        Account acc = new Account(Name = 'Kunal Singh', Phone = '9999999999', SLAExpirationDate__c = System.today(), AccountNumber = '1', AccountSource = 'Web');
+        insert acc;                       
+    }
+
+    @isTest //positive unit test for getting records
+    static void testGetRecords() 
+    {               
+        Test.startTest();
+        List<sobject> recordList = DatatableWithUpsertDeleteController.getRecords('Account', 'Name, Phone');
+        Test.stopTest(); 
+                
+        System.assertNotEquals(null,recordList);
+    }   
+    
+    @isTest //positive unit test for upserting records
+    static void testUpsertRecords() 
+    {             
+        List<Account> records = new List<Account>{new Account(Name = 'Kunal Test', Phone = '9999999999', SLAExpirationDate__c = System.today(), AccountNumber = '1', AccountSource = 'Web')};
+        Test.startTest();
+        DatatableWithUpsertDeleteController.upsertRecords(JSON.serialize(records), 'Account');
+        Test.stopTest(); 
+        
+        List<Account> newList = [SELECT Id FROM Account];
+        System.assertNotEquals(null,newList);
+    } 
+    
+    @isTest //positive unit test for getting columns
+    static void testGetColumns() 
+    {                     
+        String col = '[{"pickListValues":null,"label":"Name","isPicklist":false,"fieldType":"text","fieldName":"Name","fieldInfo":null},{"pickListValues":null,"label":"Account Source","isPicklist":true,"fieldType":"picklist","fieldName":"AccountSource","fieldInfo":{"objectApiName":"Account","fieldApiName":"AccountSource"}}]';
+        Test.startTest();
+        String columns = DatatableWithUpsertDeleteController.getColumns('Account', col);
+        Test.stopTest(); 
+                
+        System.assertNotEquals(null,columns);
+    } 
+    
+    @isTest //positive unit test for deleting records
+    static void testDeleteReocrds() 
+    {                     
+        List<Account> recordList = [SELECT Id FROM Account];
+        Test.startTest();
+        DatatableWithUpsertDeleteController.deleteReocrds(recordList);
+        Test.stopTest(); 
+        
+        List<Account> newList = [SELECT Id FROM Account];
+        System.assertEquals(0,newList.size());        
+    }     
+}
