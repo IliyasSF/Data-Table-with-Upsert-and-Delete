@@ -1,0 +1,9 @@
+<template>
+   <template if:false={showData}>
+      <lightning-spinner alternative-text="Loading"></lightning-spinner>
+  </template>
+  <template if:true={showData}>
+      <c-dynamic-table object-api-name={objectApiName} object-label={objectLabel} column-list={columns} record-size="5">
+      </c-dynamic-table>
+   </template>         
+ </template>
