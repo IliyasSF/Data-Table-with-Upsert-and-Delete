@@ -1,0 +1,20 @@
+<template>    
+    <template if:true={upsertMode}>
+        <template if:true={isPicklist}>
+            <lightning-combobox
+                name="progress"
+                variant="label-hidden"
+                value={value}
+                placeholder="Select Values"
+                options={options}
+                onchange={handleChange} >
+            </lightning-combobox>
+        </template>
+        <template if:false={isPicklist}>
+            <lightning-input type={fieldType} variant="label-hidden" label={field} name={field} value={value} onchange={handleChange}></lightning-input>
+        </template>        
+    </template>
+    <template if:false={upsertMode}>
+        <div class="slds-truncate">{value}</div>
+    </template>    
+</template>
