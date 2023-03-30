@@ -1,0 +1,86 @@
+/*************************************************************************************
+* @Name         : DatatableWithUpsertDeleteController.cls
+* @Description  : Class which perform dynamic records upsertion and deletion
+* @Created By   : Mohammed Iliyas
+* @Modification Log:
+**************************************************************************************
+* Version     Developer      Date        Description
+*-------------------------------------------------------------------------------------
+*
+*************************************************************************************/
+public without sharing class DatatableWithUpsertDeleteController
+{
+    @AuraEnabled
+    public static List<sObject> getRecords(String objectApiName, String fields) 
+    {                
+        return Database.query('SELECT ' + fields + ' FROM ' + objectApiName + ' WITH SECURITY_ENFORCED LIMIT 1000');        
+    }
+    
+    @AuraEnabled
+    public static void deleteReocrds(List<sObject> recordList) 
+    {        
+        delete recordList;
+    }
+    
+    @AuraEnabled
+    public static void upsertRecords(String records, String objectApiName) 
+    {           
+        if(String.isNotBlank(records))
+        {                                   
+            List<sObject> recordList = (List<sObject>) JSON.deserialize(records, Type.forName('List<'+objectApiName+'>.class'));   
+
+            upsert recordList;                                  
+        }
+    }
+    
+    @AuraEnabled
+    public static String getColumns(String objectName, String columnsString) 
+    {
+        system.debug('columnsString' + columnsString); 
+        List<WrapColumns> columns = new List<WrapColumns>();
+        if(String.isNotBlank(columnsString))
+        {                                   
+            columns = (List<WrapColumns>) JSON.deserialize(columnsString, List<WrapColumns>.class);   
+            for(WrapColumns col : columns)
+            {
+                if(col.isPicklist)
+                {
+                    col.pickListValues = getPickList(objectName, col.fieldName);
+                }
+            }
+        }
+        return JSON.serialize(columns);
+    }
+    
+    
+    @AuraEnabled
+    public static List<Map<String,String>> getPickList(String objectName, String fieldName) 
+    {
+        List<Map<String,String>> pickListValuesList=new List<Map<String,String>>();
+        List<Schema.DescribeSobjectResult> results = Schema.describeSObjects(new List<String>{objectName});
+        
+        for(Schema.DescribeSobjectResult res : results) {
+            for (Schema.PicklistEntry entry : res.fields.getMap().get(fieldName).getDescribe().getPicklistValues()) {
+                if (entry.isActive()) {
+                    //values.add(entry.getValue());
+                    Map<String,String> picklistvalMap=new Map<String,String>();
+                    picklistvalMap.put('value',entry.getLabel());
+                    picklistvalMap.put('label',entry.getLabel());
+                    pickListValuesList.add(picklistvalMap);                    
+                }
+            }
+        }
+        return pickListValuesList;
+    }
+    
+    // This is wrapper/container class
+    public class WrapColumns 
+    {
+        public String label {get; set;}
+        public String fieldName {get; set;}
+        public String fieldType {get; set;}        
+        public Boolean isPicklist {get; set;}
+        Map<String,String> fieldInfo {get; set;}
+        List<Map<String,String>> pickListValues {get; set;}        
+    }
+}
