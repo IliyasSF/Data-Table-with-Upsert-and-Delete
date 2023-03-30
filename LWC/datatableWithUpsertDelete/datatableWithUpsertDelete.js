@@ -30,9 +30,7 @@ export default class DatatableWithUpsertDelete extends LightningElement {
         .then(result => {
             if(result)
             {              
-                console.log('result '+JSON.stringify(JSON.parse(result)));  
                 this.columns = JSON.parse(result);       
-                console.log('col '+this.columns);           
                 this.showData = true;
                 this.error = undefined;                
             }           
